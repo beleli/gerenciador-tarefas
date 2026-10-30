@@ -1,8 +1,13 @@
 # 📝 Gerenciador de Tarefas
 
-> Aplicação Web Java (JSP + Servlet + Hibernate) para cadastro e listagem de tarefas, com MySQL/MariaDB.
+> Aplicação Web Java (JSP + Servlet + Hibernate) para cadastro, listagem, atualização de andamento e exclusão de tarefas, com MySQL/MariaDB.
 
 Trabalho AT da disciplina Linguagem de Programação Orientada a Objetos (2026-II).
+
+**GitHub:** [beleli/gerenciador](https://github.com/beleli/gerenciador-tarefas)
+
+**Google Drive** [Shared](https://drive.google.com/drive/folders/1V7PV4N3fYGD6puE4pAbuKPMFlVXdSDX6)
+
 
 ## ✨ Destaques
 
@@ -18,18 +23,16 @@ Trabalho AT da disciplina Linguagem de Programação Orientada a Objetos (2026-I
 - JDK 11+ (o Hibernate 6 e o Tomcat 10.1 não rodam em Java 8)
 - Maven 3.6+ (o Eclipse já traz embutido)
 - Apache Tomcat 10.1+
-- MySQL/MariaDB (XAMPP) ou Docker
+- Docker (ou MySQL/MariaDB local)
 
 ### 1. Banco de dados
 
-**Com XAMPP:** ligue o MySQL no painel do XAMPP, abra `http://localhost/phpmyadmin/`, vá na aba SQL e execute o conteúdo de `src/main/resources/create_table.sql`.
-
-**Com Docker:**
+Suba o banco com Docker (o script `src/main/resources/create_table.sql` é executado automaticamente na primeira inicialização):
 ```bash
 docker compose up -d
 ```
 
-O `hibernate.cfg.xml` usa usuário `root` sem senha (padrão do XAMPP). Se o seu MySQL tiver senha, altere `hibernate.connection.password`.
+O `hibernate.cfg.xml` está configurado com usuário `root` e senha `root` (mesma configuração do `docker-compose.yml`). Se o seu banco usar outra senha, altere `hibernate.connection.password`.
 
 ### 2. Executar no Eclipse
 1. `File > Import > Maven > Existing Maven Projects` e selecione a pasta do projeto.
@@ -50,9 +53,9 @@ O arquivo `target/gerenciador-tarefas.war` pode ser copiado para a pasta `webapp
 | Página | Funcionalidade |
 |---|---|
 | `cadastroTarefas.jsp` | Formulário com nome, data de vencimento, prioridade e andamento |
-| `listarTarefas.jsp` | Tabela com todas as tarefas do banco |
+| `listarTarefas.jsp` | Tabela com todas as tarefas do banco, opção de atualizar o andamento e botão de deletar |
 | `/tarefas` (GET) | Consulta as tarefas e exibe a listagem |
-| `/tarefas` (POST) | Valida e grava uma nova tarefa |
+| `/tarefas` (POST) | Valida e grava uma nova tarefa, atualiza o andamento (`acao=atualizar`) ou exclui uma tarefa (`acao=excluir`) |
 
 ---
 
@@ -122,9 +125,9 @@ gerenciador-tarefas/
 |---|---|
 | Padrão **MVC** | As JSPs não acessam o banco: o `TarefaServlet` busca os dados no DAO e entrega a lista pronta para a view |
 | Padrão **DAO** | Só o `TarefaDAO` abre `Session` do Hibernate; trocar a forma de persistir não afeta servlet nem JSP |
-| **Hibernate** em vez de JDBC puro | O SQL de INSERT e SELECT é gerado a partir das anotações da entidade `Tarefa` |
+| **Hibernate** em vez de JDBC puro | O SQL de INSERT, SELECT, UPDATE e DELETE é gerado a partir das anotações da entidade `Tarefa` |
 | **Enums + `AttributeConverter`** | O banco guarda `'em progresso'` (com espaço), que não pode ser nome de constante Java. O conversor traduz `EM_PROGRESSO` ↔ `'em progresso'` e cada enum tem o rótulo exibido na tela |
-| **Post/Redirect/Get** | Depois de cadastrar, o navegador é redirecionado para a lista; apertar F5 não grava a tarefa de novo |
+| **Post/Redirect/Get** | Depois de cadastrar, atualizar ou excluir, o navegador é redirecionado para a lista; apertar F5 não repete a operação |
 | **Validação no servidor** | O `required` do HTML pode ser burlado; o servlet confere tudo antes de chamar o DAO |
 | **`fn:escapeXml`** nas JSPs | Evita que um texto digitado com HTML seja interpretado pela página |
 | **UTF-8** em todo o caminho | `pageEncoding` nas JSPs, `setCharacterEncoding` no servlet e `characterEncoding` na URL do banco, para os acentos não quebrarem |
@@ -136,7 +139,7 @@ gerenciador-tarefas/
 
 | Sintoma | Causa provável |
 |---|---|
-| Erro "Não foi possível ... Verifique se o MySQL está ligado" | MySQL do XAMPP desligado, banco `TarefasDB` não criado ou senha diferente no `hibernate.cfg.xml` |
+| Erro "Não foi possível ... Verifique se o MySQL está ligado" | Container do banco desligado, banco `TarefasDB` não criado ou senha diferente no `hibernate.cfg.xml` |
 | 404 em `/tarefas` ou erro citando `jakarta/servlet` | Projeto rodando em Tomcat 9 ou anterior (que usa `javax`); use Tomcat 10.1+ |
 | `UnsupportedClassVersionError` | JDK 8; instale JDK 11 ou superior |
 | Acentos estranhos na lista | Tabela criada sem UTF-8; recrie o banco com o `create_table.sql` |

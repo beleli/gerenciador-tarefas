@@ -1,6 +1,7 @@
 package com.gerenciador.dao;
 
 import com.gerenciador.erro.PersistenciaException;
+import com.gerenciador.modelo.Andamento;
 import com.gerenciador.modelo.Tarefa;
 import com.gerenciador.util.HibernateUtil;
 import org.hibernate.Session;
@@ -43,6 +44,47 @@ public class TarefaDAO {
             return session.createQuery("from Tarefa order by id", Tarefa.class).list();
         } catch (Exception e) {
             throw new PersistenciaException("Não foi possível consultar as tarefas.", e);
+        }
+    }
+
+    /**
+     * Atualiza apenas o andamento de uma tarefa existente
+     * @param id Identificador da tarefa
+     * @param andamento Novo andamento
+     * @throws PersistenciaException se não for possível atualizar no banco
+     */
+    public void atualizarAndamento(Integer id, Andamento andamento) throws PersistenciaException {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            Tarefa tarefa = session.get(Tarefa.class, id);
+            if (tarefa != null) {
+                tarefa.setAndamento(andamento);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) transaction.rollback();
+            throw new PersistenciaException("Não foi possível atualizar o andamento da tarefa.", e);
+        }
+    }
+
+    /**
+     * Remove uma tarefa pelo id
+     * @param id Identificador da tarefa
+     * @throws PersistenciaException se não for possível remover no banco
+     */
+    public void excluir(Integer id) throws PersistenciaException {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            Tarefa tarefa = session.get(Tarefa.class, id);
+            if (tarefa != null) {
+                session.remove(tarefa);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) transaction.rollback();
+            throw new PersistenciaException("Não foi possível excluir a tarefa.", e);
         }
     }
 }

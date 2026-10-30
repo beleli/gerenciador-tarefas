@@ -47,7 +47,7 @@ public class TarefaServlet extends HttpServlet {
     }
 
     /**
-     * Recebe o formulário de cadastro, valida e grava a tarefa
+     * Recebe o formulário de cadastro, edição de andamento ou exclusão, valida e grava no banco
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -55,17 +55,57 @@ public class TarefaServlet extends HttpServlet {
         // Sem isso, acentos digitados no formulário chegam corrompidos
         request.setCharacterEncoding("UTF-8");
 
-        try {
-            Tarefa tarefa = lerTarefa(request);
-            tarefaDAO.salvar(tarefa);
+        String acao = request.getParameter("acao");
 
-            // Post/Redirect/Get: redireciona para a listagem, assim um F5 não cadastra a tarefa de novo
-            response.sendRedirect(request.getContextPath() + "/tarefas?sucesso=" + tarefa.getId());
+        try {
+            if ("atualizar".equals(acao)) {
+                Integer id = lerId(request);
+                Andamento andamento;
+                try {
+                    andamento = Andamento.deValor(lerTexto(request, "andamento", "Andamento"));
+                } catch (IllegalArgumentException e) {
+                    throw new ValidacaoException(e.getMessage());
+                }
+                tarefaDAO.atualizarAndamento(id, andamento);
+                response.sendRedirect(request.getContextPath() + "/tarefas?editado=" + id);
+            } else if ("excluir".equals(acao)) {
+                Integer id = lerId(request);
+                tarefaDAO.excluir(id);
+                response.sendRedirect(request.getContextPath() + "/tarefas?excluido=" + id);
+            } else {
+                Tarefa tarefa = lerTarefa(request);
+                tarefaDAO.salvar(tarefa);
+
+                // Post/Redirect/Get: redireciona para a listagem, assim um F5 não cadastra a tarefa de novo
+                response.sendRedirect(request.getContextPath() + "/tarefas?sucesso=" + tarefa.getId());
+            }
         } catch (ValidacaoException e) {
-            voltarParaCadastro(request, response, e.getMessage());
+            if (acao != null) {
+                request.setAttribute("erro", e.getMessage());
+                doGet(request, response);
+            } else {
+                voltarParaCadastro(request, response, e.getMessage());
+            }
         } catch (PersistenciaException e) {
             e.printStackTrace();
-            voltarParaCadastro(request, response, e.getMessage() + " Verifique se o MySQL está ligado.");
+            String msgErro = e.getMessage() + " Verifique se o MySQL está ligado.";
+            if (acao != null) {
+                request.setAttribute("erro", msgErro);
+                doGet(request, response);
+            } else {
+                voltarParaCadastro(request, response, msgErro);
+            }
+        }
+    }
+
+    /**
+     * Lê e valida o ID da tarefa enviado no formulário
+     */
+    private Integer lerId(HttpServletRequest request) throws ValidacaoException {
+        try {
+            return Integer.valueOf(lerTexto(request, "id", "ID da tarefa"));
+        } catch (NumberFormatException e) {
+            throw new ValidacaoException("ID da tarefa inválido.");
         }
     }
 
