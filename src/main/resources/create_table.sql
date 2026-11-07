@@ -1,5 +1,4 @@
--- Script do enunciado da AT, com uma correção:
--- o original tinha uma vírgula depois da coluna "andamento", o que gera erro de sintaxe no MySQL.
+-- Script do enunciado da AT
 
 CREATE DATABASE IF NOT EXISTS TarefasDB
     CHARACTER SET utf8mb4
