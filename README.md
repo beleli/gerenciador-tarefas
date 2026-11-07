@@ -21,7 +21,7 @@ Trabalho AT da disciplina Linguagem de Programação Orientada a Objetos (2026-I
 
 ### Pré-requisitos
 - JDK 11+ (o Hibernate 6 e o Tomcat 10.1 não rodam em Java 8)
-- Maven 3.6+ (o Eclipse já traz embutido)
+- Maven 3.6+
 - Apache Tomcat 10.1+
 - Docker (ou MySQL/MariaDB local)
 
@@ -129,17 +129,6 @@ gerenciador-tarefas/
 | **Enums + `AttributeConverter`** | O banco guarda `'em progresso'` (com espaço), que não pode ser nome de constante Java. O conversor traduz `EM_PROGRESSO` ↔ `'em progresso'` e cada enum tem o rótulo exibido na tela |
 | **Post/Redirect/Get** | Depois de cadastrar, atualizar ou excluir, o navegador é redirecionado para a lista; apertar F5 não repete a operação |
 | **Validação no servidor** | O `required` do HTML pode ser burlado; o servlet confere tudo antes de chamar o DAO |
-| **`fn:escapeXml`** nas JSPs | Evita que um texto digitado com HTML seja interpretado pela página |
 | **UTF-8** em todo o caminho | `pageEncoding` nas JSPs, `setCharacterEncoding` no servlet e `characterEncoding` na URL do banco, para os acentos não quebrarem |
 | **Tomcat 10.1 / Jakarta** | O Hibernate 6 usa `jakarta.persistence`; para não misturar `javax` e `jakarta`, o projeto todo usa as APIs Jakarta |
 
----
-
-## 🛠️ Solução de Problemas
-
-| Sintoma | Causa provável |
-|---|---|
-| Erro "Não foi possível ... Verifique se o MySQL está ligado" | Container do banco desligado, banco `TarefasDB` não criado ou senha diferente no `hibernate.cfg.xml` |
-| 404 em `/tarefas` ou erro citando `jakarta/servlet` | Projeto rodando em Tomcat 9 ou anterior (que usa `javax`); use Tomcat 10.1+ |
-| `UnsupportedClassVersionError` | JDK 8; instale JDK 11 ou superior |
-| Acentos estranhos na lista | Tabela criada sem UTF-8; recrie o banco com o `create_table.sql` |
