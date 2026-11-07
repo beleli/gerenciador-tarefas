@@ -4,7 +4,7 @@
 
 Trabalho AT da disciplina Linguagem de Programação Orientada a Objetos (2026-II).
 
-**GitHub:** [beleli/gerenciador](https://github.com/beleli/gerenciador-tarefas)
+**GitHub:** [beleli/gerenciador-tarefas](https://github.com/beleli/gerenciador-tarefas)
 
 **Google Drive** [Shared](https://drive.google.com/drive/folders/1V7PV4N3fYGD6puE4pAbuKPMFlVXdSDX6)
 
